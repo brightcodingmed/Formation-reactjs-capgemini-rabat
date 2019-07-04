@@ -2,11 +2,13 @@ import React, { Component } from 'react'
 import axios from 'axios';
 import UserItem from './UserItem';
 import UsersSearch from './UsersSearch';
+import Loading from './../layout/Loading';
 
 export default class Users extends Component {
 
     state = {
-        users: []
+        users: [],
+        loading: true
     }
 
     componentDidMount() {
@@ -18,10 +20,15 @@ export default class Users extends Component {
 
          try {
              let res = await axios.get("https://api.github.com/users");
+
              this.setState({
-                users: res.data 
+                users: res.data,
+                loading: false
              })
          } catch (error) {
+             this.setState({
+                 loading: false
+             })
            console.log(error)   
          }
 
@@ -36,23 +43,28 @@ export default class Users extends Component {
     }
 
     getResultSearch = (mySearch) => {
+
+        this.setState({loading: true})
+
         axios.get(`https://api.github.com/search/users?q=${mySearch}`)
              .then(res => {
-                 console.log(res.data.items)
+                 
                  this.setState({
-                    users: res.data.items 
+                    users: res.data.items,
+                    loading: false
                  })
              })
-             .catch(err => console.log(err))
+             .catch(err => this.setState({loading: false}))
     }
 
     render() {
         return (
         
             <div>
-                    <div className="row">
+                <div className="row">
                     <div className="col-md-12">
-                    <UsersSearch childToParent={this.getResultSearch}/> 
+                         <UsersSearch childToParent={this.getResultSearch}/> 
+                         {this.state.loading ? <Loading /> : ''} 
                     </div>
                 </div>
 

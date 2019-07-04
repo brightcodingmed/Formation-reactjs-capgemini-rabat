@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { Link } from 'react-router-dom';
 
 class UserItem extends Component {
 
@@ -26,9 +27,9 @@ class UserItem extends Component {
                     <div className="card-body">
                         <h4 className="card-title">{this.props.user.login}</h4>
                         <p className="card-text">
-                            <a href={this.props.user.html_url} className="btn btn-danger">
+                            <Link to={`/users/${this.props.user.login}`} className="btn btn-danger">
                                 Read More
-                            </a>
+                            </Link>
                         </p>
                     </div>
                 </div>
