@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import axios from 'axios';
+import Swal from 'sweetalert2'
+
 
 class Posts extends Component {
 
@@ -8,7 +10,8 @@ class Posts extends Component {
     }
 
     state = {
-        posts: [], 
+        posts: [],
+        showForm: false, 
         title: '',
         body: ''
     }
@@ -31,10 +34,50 @@ class Posts extends Component {
                 this.setState({
                     posts: [res.data, ...this.state.posts],
                     title: '',
-                    body: ''
+                    body: '',
+                    showForm: false
                 })
             })
             .catch(err => console.log(err))
+    }
+
+    toggleForm = () => {
+        this.setState({
+            showForm: !this.state.showForm
+        })
+    }
+
+    destroyPost(id) {
+        
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You will not be able to recover this imaginary file!',
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No'
+          }).then((result) => {
+            if (result.value) {
+
+
+                axios.delete(`https://jsonplaceholder.typicode.com/posts/${id}`)
+                .then(() => {
+                    this.setState({
+                        posts: this.state.posts.filter(post => post.id !== id)
+                    })
+                }) 
+
+              Swal.fire({
+                title: 'Deleted',
+                text: 'This post is deleted',
+                type: 'success',
+                timer: 5000
+              })
+            // For more information about handling dismissals please visit
+            // https://sweetalert2.github.io/#handling-dismissals
+            } 
+          })
+     
     }
 
     render() {
@@ -44,32 +87,46 @@ class Posts extends Component {
         return (
             <>
             
-            <div className="row my-2">
-                <div className="col-md-6 mx-auto">
-
-                    <div className="form-group">
-                      <label htmlFor="title">title</label>
-                      {this.state.title}
-                      <input onChange={this.initInput} value={title} type="text" name="title" id="title" className="form-control" />
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="body">body</label>
-                      {this.state.body}
-                     <textarea value={body} onChange={this.initInput} className="form-control" name="body" id="body" rows="2">
-                     </textarea>
-                    </div>
-                    
-                    <button onClick={this.persistPost} className="btn btn-primary btn-block">
-                        <i className="fa fa-send"></i> Post
+            <div className="row">
+                <div className="col-md-6">
+                    <h1 className="my-2">List of posts</h1>
+                </div>
+                <div className="col-md-6 text-right">
+                    <button onClick={this.toggleForm} className="mt-2 btn btn-primary btn-sm">
+                        <i className="fa fa-plus"></i>
                     </button>
                 </div>
             </div>
 
+            {this.state.showForm ? 
+              (<div className="row my-2">
+              <div className="col-md-6 mx-auto">
+
+                  <div className="form-group">
+                    <label htmlFor="title">title</label>
+                    {this.state.title}
+                    <input onChange={this.initInput} value={title} type="text" name="title" id="title" className="form-control" />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="body">body</label>
+                    {this.state.body}
+                   <textarea value={body} onChange={this.initInput} className="form-control" name="body" id="body" rows="2">
+                   </textarea>
+                  </div>
+                  
+                  <button onClick={this.persistPost} className="btn btn-primary btn-block">
+                      <i className="fa fa-send"></i> Post
+                  </button>
+              </div>
+          </div>)
+            : 
+            null
+            }
+            
+
             <div className="row">
                 <div className="col-md-12">
-
-                 <h1 className="my-2">List of posts</h1>
 
                 <table className="table table-striped">
                    <thead>
@@ -91,7 +148,7 @@ class Posts extends Component {
                                         <i className="fa fa-pencil"></i>
                                     </button>
 
-                                    <button className="btn btn-dark btn-sm">
+                                    <button onClick={this.destroyPost.bind(this, post.id)} className="btn btn-dark btn-sm">
                                         <i className="fa fa-trash"></i>
                                     </button>
                                 </td>
