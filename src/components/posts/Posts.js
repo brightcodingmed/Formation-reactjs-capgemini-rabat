@@ -13,6 +13,7 @@ class Posts extends Component {
         posts: [],
         showForm: false,
         editable: false, 
+        format: 'list',
         id: 0,
         title: '',
         body: ''
@@ -119,6 +120,12 @@ class Posts extends Component {
         .catch(err => console.error(EvalError))
     }
 
+    toggleFormat(format) {
+        this.setState({
+            format
+        })
+    }
+
     render() {
 
         const { title, body, editable } = this.state;
@@ -131,8 +138,16 @@ class Posts extends Component {
                     <h1 className="my-2">List of posts</h1>
                 </div>
                 <div className="col-md-6 text-right">
-                    <button onClick={this.toggleForm} className="mt-2 btn btn-primary btn-sm">
+                    <button onClick={this.toggleForm} className="mt-2 mr-3 btn btn-primary btn-sm">
                         <i className="fa fa-plus"></i>
+                    </button>
+                    
+                    <button onClick={this.toggleFormat.bind(this, 'list')} className=" mt-2 btn btn-sm btn-info mr-1">
+                        <i className="fa fa-list"></i>
+                    </button>
+
+                    <button onClick={this.toggleFormat.bind(this, 'grid')} className=" mt-2 btn btn-sm btn-info">
+                        <i className="fa fa-th"></i>
                     </button>
                 </div>
             </div>
@@ -173,8 +188,8 @@ class Posts extends Component {
             null
             }
             
-
-            <div className="row">
+            {this.state.format == 'list' ? (
+                <div className="row">
                 <div className="col-md-12">
 
                 <table className="table table-striped">
@@ -207,6 +222,32 @@ class Posts extends Component {
                </table> 
                 </div>
             </div>
+
+            )
+            : 
+            (<div className="row">
+            {this.state.posts.map(post => (
+                <div className="col-md-4">
+                    <div className="card border-secondary mb-3" style={{maxWidth: '20rem'}}>
+                        <div className="card-header">{post.title}</div>
+                        <div className="card-body">
+
+                            <p className="card-text">{post.body}</p>
+                            <br/>
+                            <button onClick={this.editPost.bind(this, post)} className="btn mr-1 btn-warning btn-sm">
+                                    <i className="fa fa-pencil"></i>
+                                </button>
+
+                                <button onClick={this.destroyPost.bind(this, post.id)} className="btn btn-dark btn-sm">
+                                    <i className="fa fa-trash"></i>
+                                </button>
+                        </div>
+                        </div>
+                </div>
+            ))}
+            
+        </div>)
+        }
                
             </>
         )
