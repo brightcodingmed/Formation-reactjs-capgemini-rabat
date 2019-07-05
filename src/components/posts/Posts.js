@@ -11,7 +11,9 @@ class Posts extends Component {
 
     state = {
         posts: [],
-        showForm: false, 
+        showForm: false,
+        editable: false, 
+        id: 0,
         title: '',
         body: ''
     }
@@ -43,7 +45,10 @@ class Posts extends Component {
 
     toggleForm = () => {
         this.setState({
-            showForm: !this.state.showForm
+            editable: false,
+            showForm: !this.state.showForm,
+            title: '',
+            body: ''
         })
     }
 
@@ -80,9 +85,43 @@ class Posts extends Component {
      
     }
 
+    editPost(post) {
+        this.setState({
+            id: post.id,
+            title: post.title,
+            body: post.body,
+            showForm: true,
+            editable: true
+        })
+    }
+
+    updatePost = () => {
+       
+        axios.put(`https://jsonplaceholder.typicode.com/posts/${this.state.id}`,{
+            title: this.state.title,
+            body: this.state.body
+        })
+        .then(res => {
+            this.state.posts.map(post => {
+                if(post.id === res.data.id) {
+                    post.title = res.data.title;
+                    post.body = res.data.body;
+                }
+            })
+            this.setState({
+                posts: this.state.posts,
+                title: '',
+                body: '',
+                showForm: false,
+                editable: false 
+            })
+        })
+        .catch(err => console.error(EvalError))
+    }
+
     render() {
 
-        const { title, body } = this.state;
+        const { title, body, editable } = this.state;
 
         return (
             <>
@@ -104,20 +143,30 @@ class Posts extends Component {
 
                   <div className="form-group">
                     <label htmlFor="title">title</label>
-                    {this.state.title}
+                  
                     <input onChange={this.initInput} value={title} type="text" name="title" id="title" className="form-control" />
                   </div>
 
                   <div className="form-group">
                     <label htmlFor="body">body</label>
-                    {this.state.body}
+                   
                    <textarea value={body} onChange={this.initInput} className="form-control" name="body" id="body" rows="2">
                    </textarea>
                   </div>
                   
-                  <button onClick={this.persistPost} className="btn btn-primary btn-block">
+                  {editable ? (
+                       <button onClick={this.updatePost} className="btn btn-warning btn-block">
+                            <i className="fa fa-refresh"></i> Update
+                        </button>
+                  )
+                  :
+                  (
+                    <button onClick={this.persistPost} className="btn btn-primary btn-block">
                       <i className="fa fa-send"></i> Post
-                  </button>
+                    </button>
+                  )
+                }
+                  
               </div>
           </div>)
             : 
@@ -144,7 +193,7 @@ class Posts extends Component {
                                 <td>{post.title}</td>
                                 <td>{post.body}</td>
                                 <td className="text-right " nowrap="true">
-                                    <button className="btn mr-1 btn-warning btn-sm">
+                                    <button onClick={this.editPost.bind(this, post)} className="btn mr-1 btn-warning btn-sm">
                                         <i className="fa fa-pencil"></i>
                                     </button>
 
